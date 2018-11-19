@@ -1,5 +1,5 @@
 
-samples: 'samples-csf-test.tsv'
+samples: 'samples.tsv'
 tmpdir: '/tmp/viral-ampliseq-assembly'
 
 # fmd, csf, ebola, zika

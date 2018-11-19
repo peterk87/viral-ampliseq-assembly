@@ -18,6 +18,11 @@ scripts/.snakemake*
 !rules/*
 !schemas
 !schemas/*
+!test
+!test/samples.tsv
+!test/config.yaml
+!test/bam
+!test/bam/a.bam
 !.gitignore
 !.gitattributes
 !.editorconfig
