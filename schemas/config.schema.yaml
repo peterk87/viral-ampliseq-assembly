@@ -1,0 +1,65 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: "Snakemake configuration file for viral-ampliseq-assembly"
+
+type: object
+
+properties:
+  samples:
+    type: string
+    description: "Path to sample sheet table"
+  tmpdir:
+    type: string
+    description: "Temporary analysis directory"
+  organism:
+    type: string
+    enum: ["fmd", "csf", "ebola", "zika"]
+    description: "Viral organism targeted by sequencing"
+  samtools:
+    type: object
+    properties:
+      threads:
+        type: integer
+        minimum: 1
+    required:
+      - threads
+  bwa:
+    type: object
+    properties:
+      threads:
+        type: integer
+        minimum: 1
+    required:
+      - threads
+  spades:
+    type: object
+    description: "Parameters for SPADes assembly rule"
+    properties:
+      threads:
+        type: integer
+        minimum: 1
+        description: "Number of threads for SPADes"
+      tmp:
+        type: string
+        description: "Temporary directory for SPADes"
+      careful:
+        type: boolean
+        description: "Perform post-assembly contig correction"
+      meta:
+        type: boolean
+        description: "Run metaSPAdes?"
+      args:
+        type: string
+        description: "Extra args to supply to spades.py"
+    required:
+      - threads
+      - tmp
+      - careful
+
+required:
+  - organism
+  - samples
+  - tmpdir
+  - samtools
+  - bwa
+  - spades

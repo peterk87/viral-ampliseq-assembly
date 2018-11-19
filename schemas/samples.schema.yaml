@@ -1,0 +1,13 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: an entry in the sample sheet
+properties:
+  sample:
+    type: string
+    description: sample name/identifier
+  bam_file:
+    type: string
+    description: Path to BAM file output from IonTorrent sequencer
+
+required:
+  - sample
+  - bam_file
