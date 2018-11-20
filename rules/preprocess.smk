@@ -96,15 +96,24 @@ rule process_samtools_depth:
 
         df = pd.read_table(input[0], names='genome position coverage'.split())
         df = df.set_index('genome', drop=False)
-	df_depth = df.copy()
-	df_depth['is_mapped'] = df_depth['coverage'] > 0
-	g = df_depth.drop(columns=['position', ]).groupby('genome')
-	df_mapped_summary = pd.DataFrame(dict(mapped_positions=g.is_mapped.sum(),
-					      mean_coverage=g.coverage.mean()))
-	df_mapped_summary.sort_values('mapped_positions', ascending=False, inplace=True)
-	df_mapped_summary.to_csv(output.genome_extent, sep='\t')
-	
+        df_depth = df.copy()
+        df_depth['is_mapped'] = df_depth['coverage'] > 0
+        g = df_depth.drop(columns=['position', ]).groupby('genome')
+        df_mapped_summary = pd.DataFrame(dict(mapped_positions=g.is_mapped.sum(),
+                                  mean_coverage=g.coverage.mean()))
+        df_mapped_summary.sort_values('mapped_positions', ascending=False, inplace=True)
+        df_mapped_summary.to_csv(output.genome_extent, sep='\t')
+    
         position_grouped = df.drop(columns='genome').groupby('position')
         df_position_max = position_grouped.max()
-	df_position_max.to_csv(output.extent, sep='\t')
+        df_position_max.to_csv(output.extent, sep='\t')
 
+rule bam_to_fastq:
+    input:
+        get_bam_file
+    output:
+        'preprocess/fastqs/{sample}.fastq'
+    conda:
+        '../envs/bwa.yaml'
+    shell:
+        "samtools bam2fq {input} > {output}"
