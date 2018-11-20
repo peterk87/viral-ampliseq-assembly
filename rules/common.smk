@@ -1,4 +1,5 @@
 from typing import Dict, List
+import logging
 from os.path import join
 
 import pandas as pd
@@ -13,7 +14,7 @@ validate(config, schema="../schemas/config.schema.yaml")
 if 'workdir' in config:
     workdir: config['workdir']
 else:
-    print('No working directory specified. Using current directory.')
+    logging.warning('No working directory specified. Using current directory.')
 
 samples = pd.read_table(config["samples"]).set_index("sample", drop=False)
 validate(samples, schema="../schemas/samples.schema.yaml")
