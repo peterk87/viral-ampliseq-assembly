@@ -1,13 +1,13 @@
 
 rule bwa_index:
     input:
-        "references/{sample}/" + config['organism'] "-references.fasta"
+        "mapping/{sample}/reference.fasta"
     output:
-        "mapped/{sample}/bwa_index.done"
+        "mapping/{sample}/bwa_index.done"
     log:
-        "logs/bwa_index/{sample}-" + config['organism'] + ".log"
+        "logs/bwa_index/{sample}.log"
     benchmark:
-        "logs/bwa_index/{sample}-" + config['organism'] + ".benchmark.tsv"
+        "benchmarks/bwa_index/{sample}.tsv"
     conda:
         "../envs/bwa.yaml"
     shell:
@@ -16,19 +16,20 @@ rule bwa_index:
         touch {output}
         """
 
+
 rule bwa_mem:
     input:
-        ref="references/{sample}/" + config['organism'] "-references.fasta",
-        reads='preprocess/samtools/view/{sample}.fastq',
-        bwa_index_done="mapped/{sample}/bwa_index.done"
+        bwa_index_done="mapping/{sample}/bwa_index.done",
+        ref="mapping/{sample}/reference.fasta",
+        reads='preprocess/fastqs/{sample}.fastq'
     output:
-        "mapped/{sample}/{sample}.bam"
+        "mapping/{sample}/{sample}.bam"
     threads:
-        config['bwa_mem']['threads']
+        config['bwa']['threads']
     log:
         "logs/bwa_mem/{sample}.log"
     benchmark:
-        "logs/bwa_mem/{sample}.benchmark.tsv"
+        "benchmarks/bwa_mem/{sample}.tsv"
     conda:
         "../envs/bwa.yaml"
     shell:
@@ -41,20 +42,86 @@ rule bwa_mem:
           2> {log}
         """
 
-rule samtools_flagstat:
-    input: "mapped/{tool}/{sample}.bam"
-    output: "mapped/{tool}/{sample}.bam.flagstat"
-    wrapper:
-        "0.27.1/bio/samtools/flagstat"
 
-rule samtools_depth:
-    input: "mapped/{tool}/{sample}.bam"
-    output: "mapped/{tool}/{sample}-depth.tsv"
+rule samtools_index:
+    input:
+        'mapping/{sample}/{sample}.bam'
+    output:
+        'mapping/{sample}/samtools_index.done'
+    threads: config['samtools']['threads']
     conda:
-        "../envs/bwa.yaml"
-    benchmark:
-        "logs/samtools_depth/{sample}-{tool}.benchmark.tsv"
+        '../envs/bwa.yaml'
     shell:
         """
-        samtools depth -d 0 {input} > {output}
+        samtools index -@ {threads} {input}
+        touch {output}
         """
+
+
+rule samtools_flagstat:
+    input:
+        'mapping/{sample}/{sample}.bam'
+    output:
+        'mapping/{sample}/{sample}.flagstat'
+    threads: config['samtools']['threads']
+    conda:
+        '../envs/bwa.yaml'
+    shell:
+        'samtools flagstat -@ {threads} {input} > {output}'
+
+
+rule samtools_idxstats:
+    """
+    Retrieve and print stats in the index file corresponding to the input file. Before calling idxstats, the input BAM file should be indexed by samtools index. 
+    The output is TAB-delimited with each line consisting of reference sequence name, sequence length, # mapped reads and # unmapped reads.
+    """
+    input:
+        bam='mapping/{sample}/{sample}.bam',
+        bai_done='mapping/{sample}/samtools_index.done'
+    output:
+        'mapping/{sample}/{sample}-idxstats.tsv'
+    conda:
+        '../envs/bwa.yaml'
+    shell:
+        'samtools idxstats {input.bam} > {output}'
+
+
+rule process_samtools_idxstats:
+    input:
+        'mapping/{sample}/{sample}-idxstats.tsv'
+    output:
+        sorted='mapping/{sample}/{sample}-idxstats-sorted.tsv',
+        top_mapped='mapping/{sample}/{sample}-idxstats-top_mapped.txt'
+    conda:
+        '../envs/python_pandas.yaml'
+    script:
+        '../scripts/process_samtools_idxstats.py'
+
+
+rule samtools_depth:
+    """
+    Calculate depth for all positions including those with zero coverage and no
+    limit on coverage.
+    """
+    input:
+        'mapping/{sample}/{sample}.bam'
+    output:
+        'mapping/{sample}/{sample}-depth.tsv'
+    conda:
+        '../envs/bwa.yaml'
+    shell:
+        'samtools depth -a -d 0 {input} > {output}'
+
+
+rule process_samtools_depth:
+    input:
+        depth='mapping/{sample}/{sample}-depth.tsv',
+        idxstats='mapping/{sample}/{sample}-idxstats-sorted.tsv'
+    output:
+        genome_extent='mapping/{sample}/{sample}-genome_extent.tsv',
+        extent='mapping/{sample}/{sample}-extent.tsv'
+    conda:
+        '../envs/python_pandas.yaml'
+    script:
+        '../scripts/process_samtools_depth.py'
+

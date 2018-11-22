@@ -8,6 +8,11 @@ organism: 'csf'
 samtools:
   threads: 56
 
+mash:
+  threads: 8
+  kmer_size: 16
+  n_sketches: 10000
+
 bwa:
   threads: 56
 
@@ -17,4 +22,3 @@ spades:
   careful: true
   meta: false
   args: ''
-

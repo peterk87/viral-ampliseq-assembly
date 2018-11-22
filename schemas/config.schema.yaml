@@ -23,6 +23,23 @@ properties:
         minimum: 1
     required:
       - threads
+  mash:
+    type: object
+    properties:
+      threads:
+        type: integer
+        minimum: 1
+      kmer_size:
+        description: "mash sketch (-k) k-mer size. Hashes will be based on strings of this many nucleotides. Canonical nucleotides are used by default. (1-32) [21]"
+        type: integer
+        minimum: 1
+        maximum: 32
+      n_sketches:
+        description: "mash sketch (-s). Sketch size. Each sketch will have at most this many non-redundant min-hashes."
+        type: integer
+        minimum: 10
+    required:
+      - threads
   bwa:
     type: object
     properties:
@@ -61,5 +78,6 @@ required:
   - samples
   - tmpdir
   - samtools
+  - mash
   - bwa
   - spades
