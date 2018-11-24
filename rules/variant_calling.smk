@@ -57,7 +57,7 @@ rule snpeff_build:
     log:
         'logs/snpeff_build/{sample}.log'
     conda:
-        '../envs/snpeff.yaml'
+        '../envs/snippy.yaml'
     shell:
         '''
         INPUT_GFF=$(realpath {input.gff})
@@ -67,7 +67,8 @@ rule snpeff_build:
         
         BINDIR=$(dirname $(which snpEff))
         WORKDIR=$(dirname {output.config})
-        ORIGINAL_CONFIG=$(find $BINDIR/../ -name "snp?ff.config")
+        ORIGINAL_CONFIG=$BINDIR/../etc/snpeff.config
+        test -r $ORIGINAL_CONFIG
 
         # Colours!
         bold() {{ echo -e "\\e[1m$@\\e[0m"; }}
@@ -129,7 +130,7 @@ rule snpeff:
     params:
         extra='-Xmx4g' # optional parameters (e.g., max memory 4g)
     conda: 
-        '../envs/snpeff.yaml'
+        '../envs/snippy.yaml'
     shell:
         '''
         INPUT_VCF=$(realpath {input.vcf})
