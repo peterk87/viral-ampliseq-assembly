@@ -15,6 +15,9 @@ properties:
     type: string
     enum: ["fmd", "csf", "ebola", "zika"]
     description: "Viral organism targeted by sequencing"
+  trim:
+    type: boolean
+    description: "Perform Trimmomatic trimming of reads"
   samtools:
     type: object
     properties:

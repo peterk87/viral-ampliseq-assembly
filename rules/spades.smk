@@ -5,34 +5,25 @@ Rule for assembly with SPAdes
 
 rule spades_assembly:
     input:
-        forward=get_fastq_forward,
-        reverse=get_fastq_reverse
+        'preprocess/trimmed_fastqs/{sample}.fastq' if config['trim'] else 'preprocess/fastqs/{sample}.fastq'
     output:
         contigs='assembly/spades/{sample}/contigs.fasta',
-        assembly_graph='assembly/spades/{sample}/contigs.gfa',
-        scaffolds='assembly/spades/{sample}/scaffolds.fasta',
-        dir='assembly/spades/{sample}'
-    threads: config['spades']['threads']
+        scaffolds='assembly/spades/{sample}/scaffolds.fasta'
+    threads: config['spades'].get('threads', 16)
     params:
-        tmp=config['spades']['tmp'],
-        careful='--careful' if config['spades']['careful'] else '',
-        meta='--meta' if config['spades']['meta'] else '',
-        args=config['spades']['args']
+        tmp=config['spades'].get('tmp', '/tmp/viral-ampliseq-assembly-spades'),
+        careful='--careful' if config['spades'].get('careful', None) else '',
+        args=config['spades'].get('args', '')
     log: 
         'logs/spades/{sample}.log'
     benchmark:
-        'benchmark/spades/{sample}.tsv'
+        'benchmarks/spades/{sample}.tsv'
     conda:
         '../envs/spades.yaml'
     shell:
-        """
-        spades.py \
-        -1 {input.forward} \
-        -2 {input.reverse} \
-        -o {output.dir} \
-        --tmp-dir {params.tmp}\
-        --threads {threads} \
-        {params.careful} \
-        {params.args} \
-        > {log} 2>&1
-        """
+        '''
+        OUTDIR=$(dirname {output.contigs})
+        spades.py --iontorrent -s {input} -o $OUTDIR \
+          --tmp-dir {params.tmp} --threads {threads} {params.careful} \
+          {params.args} &> {log}
+        '''

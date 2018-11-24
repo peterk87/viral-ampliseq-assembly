@@ -3,6 +3,4 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - bwa ==0.7.17
-  - samtools ==1.9
-  - samclip ==0.2
+  - quast

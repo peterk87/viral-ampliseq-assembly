@@ -5,16 +5,16 @@ Mash screen references genomes for user-specified organism against
 
 rule mash_sketch_reference_genomes:
     input:
-        'references/{sample}.fasta'
+        'references/' + config['organism'] + '.fasta'
     output:
-        'references/{sample}.msh'
+        'references/' + config['organism'] + '.msh'
     params:
         kmer_size=config['mash'].get('kmer_size', 16),
         n_sketches=config['mash'].get('n_sketches', 10000)
     log:
-        'logs/mash/{sample}-mash_sketch_reference_genomes.log'
+        'logs/mash/' + config['organism'] + '-mash_sketch_reference_genomes.log'
     benchmark:
-        'benchmarks/mash_sketch/{sample}.tsv'
+        'benchmarks/mash_sketch/' + config['organism'] + '.tsv'
     conda:
         '../envs/mash.yaml'
     shell:
@@ -24,7 +24,7 @@ rule mash_sketch_reference_genomes:
 rule mash_screen_reads_vs_references:
     input:
         reads='preprocess/fastqs/{sample}.fastq',
-        sketches='references/{sample}.msh'
+        sketches='references/' + config['organism'] + '.msh'
     output:
         'preprocess/mash/{sample}-screen_references.tsv'
     threads:
@@ -54,9 +54,13 @@ rule sort_mash_screen:
 rule top_reference_by_mash:
     input:
         mash='preprocess/mash/{sample}-screen_references-sorted.tsv',
-        fasta='references/{sample}.fasta'
+        genbank='references/' + config['organism'] + '.genbank'
     output:
-        'mapping/{sample}/reference.fasta'
+        fasta='mapping/{sample}/reference.fasta',
+        genbank='mapping/{sample}/reference.genbank',
+        gff='mapping/{sample}/reference.gff'
+    log:
+        'logs/scripts/top_reference_by_mash/{sample}.log'
     conda:
         '../envs/python_biopython.yaml'
     script:

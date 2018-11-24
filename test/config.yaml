@@ -5,8 +5,10 @@ tmpdir: '/tmp/viral-ampliseq-assembly'
 # fmd, csf, ebola, zika
 organism: 'csf'
 
+trim: true
+
 samtools:
-  threads: 56
+  threads: 28
 
 mash:
   threads: 8
@@ -14,12 +16,16 @@ mash:
   n_sketches: 10000
 
 bwa:
-  threads: 56
+  threads: 28
 
 spades:
-  threads: 56
+  threads: 28
   tmp: '/tmp/viral-ampliseq-assembly/spades'
   careful: true
-  meta: false
   args: ''
 
+
+freebayes:
+  mincov: 10
+  mapqual: 60
+  basequal: 13

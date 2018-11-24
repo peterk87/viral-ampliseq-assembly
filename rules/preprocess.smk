@@ -115,3 +115,19 @@ rule bam_to_fastq:
         'logs/samtools/bam2fq-{sample}.log'
     shell:
         'samtools bam2fq {input} > {output} 2> {log}'
+
+
+rule trimmomatic_se:
+    input:
+        'preprocess/fastqs/{sample}.fastq'
+    output:
+        'preprocess/trimmed_fastqs/{sample}.fastq'
+    log:
+        "logs/trimmomatic/{sample}.log"
+    params:
+        # list of trimmers (see manual)
+        trimmer=["TRAILING:3", "SLIDINGWINDOW:4:15", "MINLEN:36"],
+        # optional parameters
+        extra=""
+    wrapper:
+        "0.27.1/bio/trimmomatic/se"

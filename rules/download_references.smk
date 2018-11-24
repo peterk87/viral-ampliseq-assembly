@@ -1,11 +1,11 @@
 rule download_reference_genomes:
-    input:
-        get_bam_file
     output:
-        fasta='references/{sample}.fasta',
-        genbank='references/{sample}.genbank'
+        fasta='references/' + config['organism'] + '.fasta',
+        genbank='references/' + config['organism'] + '.genbank'
     params:
         organism=config['organism']
+    log:
+        'logs/scripts/download_reference_genomes/' + config['organism'] + '.log'
     conda:
         '../envs/python_biopython.yaml'
     script:

@@ -5,7 +5,7 @@ import pandas as pd
 from Bio import SeqIO, Entrez
 
 LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s [in %(filename)s:%(lineno)d]'
-logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+logging.basicConfig(filename=str(snakemake.log), format=LOG_FORMAT, level=logging.INFO)
 
 
 # Organism corresponds to the config organism parameter

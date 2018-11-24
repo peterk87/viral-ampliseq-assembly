@@ -1,46 +1,66 @@
 
 rule bwa_index:
     input:
-        "mapping/{sample}/reference.fasta"
+        'mapping/{sample}/reference.fasta'
     output:
-        "mapping/{sample}/bwa_index.done"
+        'mapping/{sample}/bwa_index.done'
     log:
-        "logs/bwa_index/{sample}.log"
+        'logs/bwa_index/{sample}.log'
     benchmark:
-        "benchmarks/bwa_index/{sample}.tsv"
+        'benchmarks/bwa_index/{sample}.tsv'
     conda:
-        "../envs/bwa.yaml"
+        '../envs/bwa.yaml'
     shell:
-        """
+        '''
         bwa index {input} > {log} 2>&1
         touch {output}
-        """
+        '''
+
+
+rule samtools_faidx:
+    input:
+        'mapping/{sample}/reference.fasta'
+    output:
+        'mapping/{sample}/faidx.done'
+    conda:
+        '../envs/bwa.yaml'
+    shell:
+        '''
+        samtools faidx {input}
+        touch {output}
+        '''
 
 
 rule bwa_mem:
+    """
+    Read mapping with BWA-MEM, filtering SAM file for soft and hard clipped 
+    alignments with samclip, samtools sorting and filtering of duplicate reads.
+    """
     input:
-        bwa_index_done="mapping/{sample}/bwa_index.done",
-        ref="mapping/{sample}/reference.fasta",
+        bwa_index_done='mapping/{sample}/bwa_index.done',
+        faidx_done='mapping/{sample}/faidx.done',
+        ref='mapping/{sample}/reference.fasta',
         reads='preprocess/fastqs/{sample}.fastq'
     output:
-        "mapping/{sample}/{sample}.bam"
-    threads:
-        config['bwa']['threads']
+        'mapping/{sample}/{sample}.bam'
+    params:
+        maxsoft=10 # max soft clipping to allow
+    threads: config['bwa']['threads']
     log:
-        "logs/bwa_mem/{sample}.log"
+        'logs/bwa_mem/{sample}.log'
     benchmark:
-        "benchmarks/bwa_mem/{sample}.tsv"
+        'benchmarks/bwa_mem/{sample}.tsv'
     conda:
-        "../envs/bwa.yaml"
+        '../envs/bwa.yaml'
     shell:
-        """
-        (bwa mem \
-          -t {threads} \
-          {input.ref} \
-          {input.reads} \
-        | samtools sort --threads {threads} -o {output}) \
+        '''
+        (bwa mem -t {threads} {input.ref} {input.reads} \
+        | samclip --max {params.maxsoft} --ref {input.ref}.fai \
+        | samtools sort --threads {threads} \
+        | samtools markdup -r -s - - \
+        > {output}) \
           2> {log}
-        """
+        '''
 
 
 rule samtools_index:
@@ -52,10 +72,10 @@ rule samtools_index:
     conda:
         '../envs/bwa.yaml'
     shell:
-        """
+        '''
         samtools index -@ {threads} {input}
         touch {output}
-        """
+        '''
 
 
 rule samtools_flagstat:
