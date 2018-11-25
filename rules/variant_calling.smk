@@ -138,6 +138,9 @@ rule snpeff:
         '''
         INPUT_VCF=$(realpath {input.vcf})
         INPUT_SNPEFF_CONFIG=$(realpath {input.snpeff_config})
+        touch {output.vcf}
+        touch {output.htmlstats}
+        touch {output.csvstats}
         OUTPUT_VCF=$(realpath {output.vcf})
         OUTPUT_HTMLSTATS=$(realpath {output.htmlstats})
         OUTPUT_CSVSTATS=$(realpath {output.csvstats})
