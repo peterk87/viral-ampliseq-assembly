@@ -64,6 +64,7 @@ rule snpeff_build:
         INPUT_FASTA=$(realpath {input.fasta})
         touch {output.config}
         OUTPUT_CONFIG=$(realpath {output.config})
+        touch {log}
         LOGFILE=$(realpath {log})
         
         BINDIR=$(dirname $(which snpEff))
