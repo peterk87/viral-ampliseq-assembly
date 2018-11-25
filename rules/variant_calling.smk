@@ -69,6 +69,7 @@ rule snpeff_build:
         BINDIR=$(dirname $(which snpEff))
         WORKDIR=$(dirname {output.config})
         ORIGINAL_CONFIG=$BINDIR/../etc/snpeff.config
+        
         test -r $ORIGINAL_CONFIG
 
         # Colours!
@@ -83,34 +84,34 @@ rule snpeff_build:
         purple() {{ echo -e "\\e[35m$@\\e[0m"; }}
         bold_purple() {{ bold $(purple $@); }}
         
-        bold_yellow "Starting GFF and config file preprocessing" #> $LOGFILE
+        bold_yellow "Starting GFF and config file preprocessing" | tee $LOGFILE
         
-        green "Copying $(blue $ORIGINAL_CONFIG) to $(purple $OUTPUT_CONFIG)" #>> $LOGFILE
+        green "Copying $(blue $ORIGINAL_CONFIG) to $(purple $OUTPUT_CONFIG)" | tee -a $LOGFILE
         cp $ORIGINAL_CONFIG $OUTPUT_CONFIG
         
-        echo -e "Get reference genome accession from GFF file" #>> $LOGFILE
+        echo -e "Get reference genome accession from GFF file" | tee -a $LOGFILE
         ACCESSION=$(awk '/^#/{{f=1;next}} f{{ print $1 }}' {input.gff} | uniq -)
-        echo -e "Ref genome accession is $(red $ACCESSION)" #>> $LOGFILE
-        yellow "Adding entry for $(red $ACCESSION) to $(purple $OUTPUT_CONFIG)" #>> $LOGFILE
-        echo -e "ref.genome : The Reference" #>> $OUTPUT_CONFIG
-        echo -e "\\tref.chromosome : $ACCESSION" #>> $OUTPUT_CONFIG
-        echo -e "\\tref.$ACCESSION.codonTable : Standard" #>> $OUTPUT_CONFIG
+        echo -e "Ref genome accession is $(red $ACCESSION)" | tee -a $LOGFILE
+        yellow "Adding entry for $(red $ACCESSION) to $(purple $OUTPUT_CONFIG)" | tee -a $LOGFILE
+        echo -e "ref.genome : The Reference" | tee -a $OUTPUT_CONFIG
+        echo -e "\\tref.chromosome : $ACCESSION" | tee -a $OUTPUT_CONFIG
+        echo -e "\\tref.$ACCESSION.codonTable : Standard" | tee -a $OUTPUT_CONFIG
 
-        blue "Printing last 3 lines of $(purple $OUTPUT_CONFIG)" #>> $LOGFILE
-        tail -n3 $OUTPUT_CONFIG #>> $LOGFILE
+        blue "Printing last 3 lines of $(purple $OUTPUT_CONFIG)" | tee -a $LOGFILE
+        tail -n3 $OUTPUT_CONFIG | tee -a $LOGFILE
         pushd $WORKDIR
-        bold_yellow "Changed dir to snpEff build work dir $(bold_blue $PWD)" #>> $LOGFILE
+        bold_yellow "Changed dir to snpEff build work dir $(bold_blue $PWD)" | tee -a $LOGFILE
         mkdir -p ref
-        echo "Copying reference genome GFF and FASTA to ref/" #>> $LOGFILE
-        echo "Stripping away UTR features since they cause issues for snpEff" #>> $LOGFILE
+        echo "Copying reference genome GFF and FASTA to ref/" | tee -a $LOGFILE
+        echo "Stripping away UTR features since they cause issues for snpEff" | tee -a $LOGFILE
         grep -Pv "^${{ACCESSION}}\\tfeature\\t[^\\s]*UTR\\t" $INPUT_GFF > ref/genes.gff
-        green "Original GFF lineno=$(bold_purple $(wc -l $INPUT_GFF))" #>> $LOGFILE
-        green "snpEff GFF   lineno=$(bold_purple $(wc -l $(realpath ref/genes.gff)))" #>> $LOGFILE
+        green "Original GFF lineno=$(bold_purple $(wc -l $INPUT_GFF))" | tee -a $LOGFILE
+        green "snpEff GFF   lineno=$(bold_purple $(wc -l $(realpath ref/genes.gff)))" | tee -a $LOGFILE
         cp $INPUT_FASTA ref/sequences.fa
-        bold_yellow "Finished GFF and config file preprocessing" #>> $LOGFILE
+        bold_yellow "Finished GFF and config file preprocessing" | tee -a $LOGFILE
         
-        bold_green "Running snpEff build..." #>> $LOGFILE
-        snpEff build -v -c $OUTPUT_CONFIG -dataDir . -gff3 ref #&>> $LOGFILE
+        bold_green "Running snpEff build..." | tee -a $LOGFILE
+        snpEff build -v -c $OUTPUT_CONFIG -dataDir . -gff3 ref | tee -a $LOGFILE
         # go back to original work dir
         popd
         '''
