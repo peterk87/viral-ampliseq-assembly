@@ -3,17 +3,11 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "3.6"
 
-cache:
-  directories:
-  - $HOME/miniconda
-  - $HOME/peterk87/viral-ampliseq-assembly/test/.snakemake
-
 install:
   - sudo apt-get update
   - sudo apt install realpath
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - LS_MINICONDA=$(ls $HOME/miniconda/)
-  - if [ ${#LS_MINICONDA} -eq 0 ]; then rm -r $HOME/miniconda; bash miniconda.sh -b -p $HOME/miniconda; fi
+  - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
@@ -28,7 +22,6 @@ install:
   # add additional stuff to setup below
 
 script:
-  - export PATH="$HOME/miniconda/bin:$PATH"
   - source activate snakemake
   # run the workflow
   # put a test case into the subfolder .test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
