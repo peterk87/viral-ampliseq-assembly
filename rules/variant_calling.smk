@@ -31,9 +31,9 @@ rule filter_vcf:
     output:
         'variant_calling/{sample}-filtered.vcf'
     params:
-        minqual=80, # Minimum read mapping quality to consider
-        mincov=10, # Minimum site depth to for calling alleles
-        minfrac=0 # Minumum proportion for variant evidence (0=AUTO)
+        minqual=config['vcf_filtering'].get('minqual', 100),
+        mincov=config['freebayes'].get('mincov', 10),
+        minfrac=config['vcf_filtering'].get('minfrac', 0.8)
     conda:
         '../envs/snippy.yaml'
     shell:
@@ -60,17 +60,16 @@ rule snpeff_build:
         '../envs/snippy.yaml'
     shell:
         '''
+        touch {output.config}
+        touch {log}
         INPUT_GFF=$(realpath {input.gff})
         INPUT_FASTA=$(realpath {input.fasta})
-        touch {output.config}
         OUTPUT_CONFIG=$(realpath {output.config})
-        touch {log}
         LOGFILE=$(realpath {log})
-        
+
         BINDIR=$(dirname $(which snpEff))
         WORKDIR=$(dirname {output.config})
         ORIGINAL_CONFIG=$BINDIR/../etc/snpeff.config
-        
         test -r $ORIGINAL_CONFIG
 
         # Colours!
@@ -84,12 +83,10 @@ rule snpeff_build:
         bold_blue() {{ bold $(blue $@); }}
         purple() {{ echo -e "\\e[35m$@\\e[0m"; }}
         bold_purple() {{ bold $(purple $@); }}
-        
+
         bold_yellow "Starting GFF and config file preprocessing" | tee $LOGFILE
-        
         green "Copying $(blue $ORIGINAL_CONFIG) to $(purple $OUTPUT_CONFIG)" | tee -a $LOGFILE
         cp $ORIGINAL_CONFIG $OUTPUT_CONFIG
-        
         echo -e "Get reference genome accession from GFF file" | tee -a $LOGFILE
         ACCESSION=$(awk '/^#/{{f=1;next}} f{{ print $1 }}' {input.gff} | uniq -)
         echo -e "Ref genome accession is $(red $ACCESSION)" | tee -a $LOGFILE
@@ -100,7 +97,7 @@ rule snpeff_build:
 
         blue "Printing last 3 lines of $(purple $OUTPUT_CONFIG)" | tee -a $LOGFILE
         tail -n3 $OUTPUT_CONFIG | tee -a $LOGFILE
-        pushd $WORKDIR
+        pushd $WORKDIR > /dev/null
         bold_yellow "Changed dir to snpEff build work dir $(bold_blue $PWD)" | tee -a $LOGFILE
         mkdir -p ref
         echo "Copying reference genome GFF and FASTA to ref/" | tee -a $LOGFILE
@@ -110,11 +107,11 @@ rule snpeff_build:
         green "snpEff GFF   lineno=$(bold_purple $(wc -l $(realpath ref/genes.gff)))" | tee -a $LOGFILE
         cp $INPUT_FASTA ref/sequences.fa
         bold_yellow "Finished GFF and config file preprocessing" | tee -a $LOGFILE
-        
+
         bold_green "Running snpEff build..." | tee -a $LOGFILE
         snpEff build -v -c $OUTPUT_CONFIG -dataDir . -gff3 ref | tee -a $LOGFILE
         # go back to original work dir
-        popd
+        popd > /dev/null
         '''
 
 
@@ -128,7 +125,9 @@ rule snpeff:
         snpeff_config='variant_calling/snpeff/{sample}/snpeff.config'
     output:
         vcf='variant_calling/snpeff/{sample}.vcf',
-        htmlstats='variant_calling/snpeff/{sample}.html',
+        htmlstats=report('variant_calling/snpeff/{sample}.html',
+                         caption='../report/results/snpeff.rst',
+                         category='Variant Calling'),
         csvstats='variant_calling/snpeff/{sample}.csv'
     params:
         extra='-Xmx4g' # optional parameters (e.g., max memory 4g)
@@ -136,23 +135,23 @@ rule snpeff:
         '../envs/snippy.yaml'
     shell:
         '''
-        INPUT_VCF=$(realpath {input.vcf})
-        INPUT_SNPEFF_CONFIG=$(realpath {input.snpeff_config})
         touch {output.vcf}
         touch {output.htmlstats}
         touch {output.csvstats}
+        INPUT_VCF=$(realpath {input.vcf})
+        INPUT_SNPEFF_CONFIG=$(realpath {input.snpeff_config})
         OUTPUT_VCF=$(realpath {output.vcf})
         OUTPUT_HTMLSTATS=$(realpath {output.htmlstats})
         OUTPUT_CSVSTATS=$(realpath {output.csvstats})
         WORKDIR=$(dirname {input.snpeff_config})
-        pushd $WORKDIR
+        pushd $WORKDIR > /dev/null
         snpEff ann {params.extra} \
         -noLog -csvStats $OUTPUT_CSVSTATS \
         -htmlStats $OUTPUT_HTMLSTATS \
         -c $INPUT_SNPEFF_CONFIG \
         -dataDir . \
         ref $INPUT_VCF > $OUTPUT_VCF
-        popd
+        popd > /dev/null
         '''
 
 
@@ -162,7 +161,9 @@ rule vcf_to_tab:
         fasta='mapping/{sample}/reference.fasta',
         vcf='variant_calling/snpeff/{sample}.vcf'
     output:
-        'variant_calling/{sample}-vcf.tsv'
+        report('variant_calling/{sample}-vcf.tsv', 
+               caption='../report/results/variants_table.rst', 
+               category='Variant Calling')
     log:
         'logs/vcf_to_tab/{sample}.log'
     conda:

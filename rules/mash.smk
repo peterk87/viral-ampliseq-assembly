@@ -43,7 +43,8 @@ rule sort_mash_screen:
     input:
         'preprocess/mash/{sample}-screen_references.tsv'
     output:
-        'preprocess/mash/{sample}-screen_references-sorted.tsv'
+        report('preprocess/mash/{sample}-screen_references-sorted.tsv', 
+               category='Reference Genome Selection by Mash Screen')
     shell:
         '''
         echo -ne "identity\tmatching_sketches\tmultiplicity\tpvalue\tmatch\tmatch_comment\n" > {output}

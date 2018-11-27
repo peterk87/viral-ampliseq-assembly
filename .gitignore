@@ -18,6 +18,10 @@ scripts/.snakemake*
 !rules/*
 !schemas
 !schemas/*
+!report
+!report/*.rst
+!report/results
+!report/results/*.rst
 !test
 !test/samples.tsv
 !test/config.yaml

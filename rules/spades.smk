@@ -7,7 +7,8 @@ rule spades_assembly:
     input:
         'preprocess/trimmed_fastqs/{sample}.fastq' if config['trim'] else 'preprocess/fastqs/{sample}.fastq'
     output:
-        contigs='assembly/spades/{sample}/contigs.fasta',
+        contigs=report('assembly/spades/{sample}/contigs.fasta', 
+                       category='De Novo Assembly'),
         scaffolds='assembly/spades/{sample}/scaffolds.fasta'
     threads: config['spades'].get('threads', 16)
     params:

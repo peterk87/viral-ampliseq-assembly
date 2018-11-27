@@ -5,7 +5,7 @@ from os.path import join
 import pandas as pd
 from snakemake.utils import validate
 
-# report: "../report/workflow.rst"
+report: "../report/workflow.rst"
 
 ###### Config file and sample sheets #####
 configfile: "config.yaml"

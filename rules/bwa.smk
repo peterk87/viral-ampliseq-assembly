@@ -138,7 +138,8 @@ rule process_samtools_depth:
         depth='mapping/{sample}/{sample}-depth.tsv',
         idxstats='mapping/{sample}/{sample}-idxstats-sorted.tsv'
     output:
-        genome_extent='mapping/{sample}/{sample}-genome_extent.tsv',
+        genome_extent=report('mapping/{sample}/{sample}-genome_extent.tsv',
+                             category='Read mapping to reference genome'),
         extent='mapping/{sample}/{sample}-extent.tsv'
     conda:
         '../envs/python_pandas.yaml'

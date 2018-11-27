@@ -24,8 +24,11 @@ spades:
   careful: true
   args: ''
 
-
 freebayes:
   mincov: 10
   mapqual: 60
   basequal: 13
+
+vcf_filtering:
+  minqual: 100
+  minfrac: 0.8
