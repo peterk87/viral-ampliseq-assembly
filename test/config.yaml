@@ -25,10 +25,11 @@ spades:
   args: ''
 
 freebayes:
-  mincov: 10
-  mapqual: 60
-  basequal: 13
+  mincov: 5
+  minobs: 5
+  mapqual: 50
+  basequal: 11
 
 vcf_filtering:
-  minqual: 100
-  minfrac: 0.8
+  minqual: 80
+  minfrac: 0.6

@@ -11,11 +11,11 @@ rule freebayes:
     log:
         'logs/freebayes/{sample}.log'
     params:
-        extra='-p 2 -P 0 -C ' + str(config['freebayes'].get('mincov', 10)) + \
+        extra='-p 2 -P 0 -C ' + str(config['freebayes'].get('minobs', 5)) + \
               ' --min-repeat-entropy 1.5 --strict-vcf ' + \
               ' -q ' + str(config['freebayes'].get('basequal', 13)) + \
               ' -m ' + str(config['freebayes'].get('mapqual', 60)) + \
-              ' --min-coverage ' + str(config['freebayes'].get('mincov', 10)) + \
+              ' --min-coverage ' + str(config['freebayes'].get('mincov', 5)) + \
               ' -F 0.05'
     threads: 1
     wrapper:
@@ -32,14 +32,14 @@ rule filter_vcf:
         'variant_calling/{sample}-filtered.vcf'
     params:
         minqual=config['vcf_filtering'].get('minqual', 100),
-        mincov=config['freebayes'].get('mincov', 10),
-        minfrac=config['vcf_filtering'].get('minfrac', 0.8)
+        mincov=config['freebayes'].get('mincov', 5),
+        alt_ref_ratio=config['vcf_filtering'].get('alt_ref_ratio', 1.1)
     conda:
         '../envs/snippy.yaml'
     shell:
         '''
         bcftools view \
-        --include 'QUAL>={params.minqual} && FMT/DP>={params.mincov} && (FMT/AO)/(FMT/DP)>={params.minfrac}' \
+        --include 'QUAL>={params.minqual} && FMT/DP>={params.mincov} && (FMT/AO)/(FMT/RO)>={params.alt_ref_ratio}' \
         {input} > {output}
         '''
 

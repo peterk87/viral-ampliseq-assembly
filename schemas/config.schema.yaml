@@ -82,10 +82,14 @@ properties:
     type: object
     description: "Parameters for variant calling with FreeBayes"
     properties:
+      minobs:
+        type: integer
+        default: 5
+        description: "Minimum times an allele must be observed"
       mincov:
         type: integer
         minimum: 1
-        default: 10
+        default: 5
         description: "Minimum coverage depth for variant calling"
       mapqual:
         type: number
@@ -104,10 +108,14 @@ properties:
         type: number
         default: 100
         description: "Minimum quality in VCF to filter by"
-      minfrac:
+      alt_ref_ratio:
         type: number
-        default: 0
-        description: "Minimum proportion of variant evidence"
+        default: 1.1
+        description: "Ratio threshold of count of alternate to reference allele"
+      mincov:
+        type: integer
+        default: 5
+
 
 required:
   - organism

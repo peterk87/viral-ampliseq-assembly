@@ -1,4 +1,21 @@
 
+rule replace_ambiguous_bases_in_reference:
+    '''
+    Replace ambiguous bases with N so that bcftools consensus won't have issues
+    with the REF allele and reference sequence not matching up.
+    '''
+    input:
+        'mapping/{sample}/reference.fasta'
+    output:
+        'consensus/{sample}/reference.fasta'
+    log:
+        'logs/scripts/replace_ambiguous_bases_in_reference/{sample}.log'
+    conda:
+        '../envs/python_biopython.yaml'
+    script:
+        '../scripts/replace_ambiguous_bases_in_reference.py'
+
+
 rule bcftools_convert:
     input:
         'variant_calling/snpeff/{sample}.vcf'
@@ -24,7 +41,7 @@ rule bcftools_index:
 
 rule bcftools_consensus:
     input:
-        ref='mapping/{sample}/reference.fasta',
+        ref='consensus/{sample}/reference.fasta',
         vcfgz='consensus/{sample}.vcf.gz',
         vcfgz_index='consensus/{sample}.vcf.gz.csi'
     output:
