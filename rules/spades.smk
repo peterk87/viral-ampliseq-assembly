@@ -7,8 +7,7 @@ rule spades_assembly:
     input:
         'preprocess/trimmed_fastqs/{sample}.fastq' if config['trim'] else 'preprocess/fastqs/{sample}.fastq'
     output:
-        contigs=report('assembly/spades/{sample}/contigs.fasta', 
-                       category='De Novo Assembly'),
+        contigs='assembly/spades/{sample}/contigs.fasta',
         scaffolds='assembly/spades/{sample}/scaffolds.fasta'
     threads: config['spades'].get('threads', 16)
     params:
@@ -27,4 +26,16 @@ rule spades_assembly:
         spades.py --iontorrent -s {input} -o $OUTDIR \
           --tmp-dir {params.tmp} --threads {threads} {params.careful} \
           {params.args} &> {log}
+        '''
+
+rule rename_denovo_assembly:
+    input:
+        'assembly/spades/{sample}/contigs.fasta'
+    output:
+        report('assembly/spades-{sample}.fasta',
+               caption='../report/results/assembly.rst',
+               category='De Novo Assembly')
+    shell:
+        '''
+        cp {input} {output}
         '''

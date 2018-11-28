@@ -39,7 +39,9 @@ rule fix_consensus:
         fasta='consensus/{sample}-raw.fasta',
         depth='mapping/{sample}/{sample}-depth.tsv'
     output:
-        fasta='consensus/{sample}.fasta'
+        fasta=report('consensus/{sample}.fasta', 
+                     category='Consensus from variant calling to closest reference',
+                     caption='../report/results/consensus.rst')
     params:
         unmapped_char='-'
     conda:

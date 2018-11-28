@@ -20,7 +20,7 @@ rule all:
         expand('preprocess/fastqs/{sample}.fastq', sample=samples.index),
         expand('preprocess/mash/{sample}-screen_references-sorted.tsv', sample=samples.index),
         expand('mapping/{sample}/{sample}-extent.tsv', sample=samples.index),
-        expand('assembly/spades/{sample}/contigs.fasta', sample=samples.index),
+        expand('assembly/spades-{sample}.fasta', sample=samples.index),
         expand('variant_calling/{sample}-vcf.tsv', sample=samples.index),
         expand('consensus/{sample}.fasta', sample=samples.index)
 
