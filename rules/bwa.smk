@@ -1,9 +1,9 @@
 
 rule bwa_index:
     input:
-        'mapping/{sample}/reference.fasta'
+        'references/{sample}/reference-no_ambig.fasta'
     output:
-        'mapping/{sample}/bwa_index.done'
+        'references/{sample}/reference-no_ambig.fasta.bwt'
     log:
         'logs/bwa_index/{sample}.log'
     benchmark:
@@ -13,21 +13,21 @@ rule bwa_index:
     shell:
         '''
         bwa index {input} > {log} 2>&1
-        touch {output}
+        test -r {output}
         '''
 
 
 rule samtools_faidx:
     input:
-        'mapping/{sample}/reference.fasta'
+        'references/{sample}/reference-no_ambig.fasta'
     output:
-        'mapping/{sample}/faidx.done'
+        'references/{sample}/reference-no_ambig.fasta.fai'
     conda:
         '../envs/bwa.yaml'
     shell:
         '''
         samtools faidx {input}
-        touch {output}
+        test -r {output}
         '''
 
 
@@ -37,9 +37,9 @@ rule bwa_mem:
     alignments with samclip, samtools sorting and filtering of duplicate reads.
     """
     input:
-        bwa_index_done='mapping/{sample}/bwa_index.done',
-        faidx_done='mapping/{sample}/faidx.done',
-        ref='mapping/{sample}/reference.fasta',
+        ref='references/{sample}/reference-no_ambig.fasta',
+        ref_bwa_index='references/{sample}/reference-no_ambig.fasta.bwt',
+        ref_fai='references/{sample}/reference-no_ambig.fasta.fai',
         reads='preprocess/fastqs/{sample}.fastq'
     output:
         'mapping/{sample}/{sample}.bam'
@@ -55,7 +55,7 @@ rule bwa_mem:
     shell:
         '''
         (bwa mem -t {threads} {input.ref} {input.reads} \
-        | samclip --max {params.maxsoft} --ref {input.ref}.fai \
+        | samclip --max {params.maxsoft} --ref {input.ref_fai} \
         | samtools sort --threads {threads} \
         | samtools markdup -r -s - - \
         > {output}) \
@@ -67,14 +67,14 @@ rule samtools_index:
     input:
         'mapping/{sample}/{sample}.bam'
     output:
-        'mapping/{sample}/samtools_index.done'
+        'mapping/{sample}/{sample}.bam.bai'
     threads: config['samtools']['threads']
     conda:
         '../envs/bwa.yaml'
     shell:
         '''
         samtools index -@ {threads} {input}
-        touch {output}
+        test -r {output}
         '''
 
 
@@ -97,7 +97,7 @@ rule samtools_idxstats:
     """
     input:
         bam='mapping/{sample}/{sample}.bam',
-        bai_done='mapping/{sample}/samtools_index.done'
+        bai_done='mapping/{sample}/{sample}.bam.bai'
     output:
         'mapping/{sample}/{sample}-idxstats.tsv'
     conda:

@@ -1,10 +1,27 @@
 
+rule replace_ambiguous_bases_in_reference:
+    '''
+    Replace ambiguous bases with N so that bcftools consensus won't have issues
+    with the REF allele and reference sequence not matching up.
+    '''
+    input:
+        'references/{sample}/reference.fasta'
+    output:
+        'references/{sample}/reference-no_ambig.fasta'
+    log:
+        'logs/scripts/replace_ambiguous_bases_in_reference/{sample}.log'
+    conda:
+        '../envs/python_biopython.yaml'
+    script:
+        '../scripts/replace_ambiguous_bases_in_reference.py'
+
+
 rule freebayes:
     """
     Variant calling with FreeBayes
     """
     input:
-        ref='mapping/{sample}/reference.fasta',
+        ref='references/{sample}/reference-no_ambig.fasta',
         samples='mapping/{sample}/{sample}.bam'
     output:
         'variant_calling/{sample}.vcf'
@@ -50,8 +67,8 @@ rule snpeff_build:
     sample.
     """
     input:
-        gff='mapping/{sample}/reference.gff',
-        fasta='mapping/{sample}/reference.fasta'
+        gff='references/{sample}/reference.gff',
+        fasta='references/{sample}/reference-no_ambig.fasta'
     output:
         config='variant_calling/snpeff/{sample}/snpeff.config'
     log:
@@ -157,8 +174,8 @@ rule snpeff:
 
 rule vcf_to_tab:
     input:
-        gff='mapping/{sample}/reference.gff',
-        fasta='mapping/{sample}/reference.fasta',
+        gff='references/{sample}/reference.gff',
+        fasta='references/{sample}/reference-no_ambig.fasta',
         vcf='variant_calling/snpeff/{sample}.vcf'
     output:
         report('variant_calling/{sample}-vcf.tsv', 

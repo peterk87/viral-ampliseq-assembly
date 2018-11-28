@@ -57,9 +57,9 @@ rule top_reference_by_mash:
         mash='preprocess/mash/{sample}-screen_references-sorted.tsv',
         genbank='references/' + config['organism'] + '.genbank'
     output:
-        fasta='mapping/{sample}/reference.fasta',
-        genbank='mapping/{sample}/reference.genbank',
-        gff='mapping/{sample}/reference.gff'
+        fasta='references/{sample}/reference.fasta',
+        genbank='references/{sample}/reference.genbank',
+        gff='references/{sample}/reference.gff'
     log:
         'logs/scripts/top_reference_by_mash/{sample}.log'
     conda:
