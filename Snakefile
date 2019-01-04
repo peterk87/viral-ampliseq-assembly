@@ -22,7 +22,10 @@ rule all:
         expand('mapping/{sample}/{sample}-extent.tsv', sample=samples.index),
         expand('assembly/spades-{sample}.fasta', sample=samples.index),
         expand('variant_calling/{sample}-vcf.tsv', sample=samples.index),
-        expand('consensus/{sample}.fasta', sample=samples.index)
+        expand('consensus/{sample}.fasta', sample=samples.index),
+        'msa/alignment.fasta',
+        'msa/alignment.fasta.treefile',
+        'phylogeny/rooted_tree.newick'
 
 
 # include rules for each step in workflow
@@ -34,3 +37,5 @@ include: "rules/spades.smk"
 include: "rules/variant_calling.smk"
 include: "rules/qc.smk"
 include: "rules/consensus.smk"
+include: "rules/msa.smk"
+include: "rules/phylogeny.smk"
