@@ -18,5 +18,5 @@ rule mafft_msa:
         '../envs/mafft.yaml'
     threads: 56
     shell:
-        'mafft --globalpair --thread {threads} {input} > {output} 2> {log}'
+        'mafft --globalpair --thread {threads} {input} > {output} 2> >(tee -a {log} >&2)'
 
