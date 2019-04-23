@@ -21,6 +21,9 @@ properties:
     type: boolean
     description: "Perform Trimmomatic trimming of reads"
     default: true
+  fast_tree:
+    type: boolean
+    description: "Create a quick and dirty Relaxed Neighbor Joining (RNJ) tree with Clearcut, otherwise, create a maximum-likelihood tree with IQ-TREE with ultrafast-bootstrap values."
   samtools:
     type: object
     properties:

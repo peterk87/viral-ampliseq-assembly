@@ -1,20 +1,6 @@
-
-rule replace_ambiguous_bases_in_reference:
-    '''
-    Replace ambiguous bases with N so that bcftools consensus won't have issues
-    with the REF allele and reference sequence not matching up.
-    '''
-    input:
-        'references/{sample}/reference.fasta'
-    output:
-        'references/{sample}/reference-no_ambig.fasta'
-    log:
-        'logs/scripts/replace_ambiguous_bases_in_reference/{sample}.log'
-    conda:
-        '../envs/python_biopython.yaml'
-    script:
-        '../scripts/replace_ambiguous_bases_in_reference.py'
-
+"""
+Variant calling rules
+"""
 
 rule freebayes:
     """

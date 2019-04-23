@@ -12,11 +12,13 @@ rule mafft_msa:
         'msa/samples-pre-aln.fasta'
     output:
         'msa/alignment.fasta'
+    params:
+        '--auto'
     log: 
         'logs/mafft.log'
     conda:
         '../envs/mafft.yaml'
     threads: 56
     shell:
-        'mafft --globalpair --thread {threads} {input} > {output} 2> >(tee -a {log} >&2)'
+        'mafft --thread {threads} {params} {input} > {output} 2> >(tee -a {log} >&2)'
 

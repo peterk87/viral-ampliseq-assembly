@@ -29,11 +29,11 @@ good_nts = set('ACGT')
 # . or -  gap
 # https://www.bioinformatics.org/sms/iupac.html
 
-ambigous_repl = dict(R='A', Y='C', S='G', W='A',
-                     K='G', M='A', B='C', D='A',
-                     H='A', V='A', N='A')
+ambigous_repl = set('RYSWKMBDHV')
 
 input_fasta = snakemake.input[0]
+output_fasta = snakemake.output[0]
+
 
 def replace_ambiguous(rec):
     replaced: int = 0
@@ -41,19 +41,17 @@ def replace_ambiguous(rec):
     for idx, nt in enumerate(rec.seq):
         nt = nt.upper()
         if nt not in good_nts and nt in ambigous_repl:
-            repl = ambigous_repl[nt]
-            logging.info(f'Found ambigous base in {rec.id} "{nt}" at position {idx + 1}. Replacing with "{repl}"')
-            mutable_seq[idx] = repl
+            logging.info(f'Found ambigous base in {rec.id} "{nt}" at position {idx + 1}. Replacing with "N"')
+            mutable_seq[idx] = 'N'
             replaced += 1
         elif nt not in good_nts and nt not in ambigous_repl:
-            logging.warning(f'Character "{nt}" at index {idx} in "{rec.id}" not in ambigous base substitution dictionary! Replacing with "A"')
-            mutable_seq[idx] = 'A'
+            logging.warning(f'Character "{nt}" at index {idx} in "{rec.id}" not in ambigous base substitution dictionary! Replacing with "N"')
+            mutable_seq[idx] = 'N'
     if replaced > 0:
         logging.info(f'Found and replaced {replaced} bases in "{rec.description}".')
         rec.seq = mutable_seq.toseq()
     return rec
 
-
 recs = [replace_ambiguous(r) for r in SeqIO.parse(input_fasta, format='fasta')]
 
-SeqIO.write(recs, snakemake.output[0], 'fasta')
+SeqIO.write(recs, output_fasta, 'fasta')

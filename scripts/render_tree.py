@@ -14,10 +14,9 @@ input_newick = snakemake.input.newick
 output_rooted_newick = snakemake.output.rooted_newick
 output_tree_png = snakemake.output.tree_png
 output_tree_svg = snakemake.output.tree_svg
+output_metadata_tsv = snakemake.output.metadata_tsv
 # PARAMETERS
 sample_names: List[str] = [x for x in snakemake.params.samples]
-tree_img_width = snakemake.params.tree_img_width or 2000
-tree_img_height = snakemake.params.tree_img_height or 2000
 
 
 def trunc(s: str, w: int = 50) -> str:
@@ -65,6 +64,9 @@ tree.set_outgroup(midpoint_node)
 # Output re-rooted tree
 tree.write(outfile=output_rooted_newick)
 
+# Save phylogeny ordered genome metadata table
+df_metadata_out = df_metadata.loc[list(tree.iter_leaf_names()), metadata_columns]
+df_metadata_out.to_csv(output_metadata_tsv, sep='\t')
 
 def tree_style_layout(node):
     if node.is_leaf() and node.name in df_metadata.index:
@@ -89,5 +91,5 @@ tree_style = TreeStyle()
 tree_style.show_leaf_name = True
 tree_style.show_branch_support = True
 tree_style.layout_fn = tree_style_layout
-tree.render(output_tree_png, tree_style=tree_style, w=tree_img_width, h=tree_img_height)
-tree.render(output_tree_svg, tree_style=tree_style, w=tree_img_width, h=tree_img_height)
+tree.render(output_tree_png, tree_style=tree_style)
+tree.render(output_tree_svg, tree_style=tree_style)
