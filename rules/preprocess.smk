@@ -1,13 +1,30 @@
-rule samtools_index_bam:
+"""
+Remove duplicated reads, get BAM alignment stats and output the reads in FASTQ format.
+"""
+
+
+rule mark_duplicates:
     input:
         get_bam_file
     output:
+        bam="preprocess/dedup/{sample}.bam",
+        metrics="preprocess/dedup/{sample}.metrics.txt"
+    log:
+        "logs/picard/dedup/{sample}.log"
+    params:
+        "REMOVE_DUPLICATES=true"
+    wrapper:
+        "0.27.1/bio/picard/markduplicates"
+
+
+rule samtools_index_bam_initial:
+    input:
+        "preprocess/dedup/{sample}.bam"
+    output:
         'preprocess/samtools/index/{sample}.done'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     benchmark:
-        'benchmark/samtools_index_bam/{sample}.tsv'
+        'benchmarks/samtools_index_bam/{sample}.tsv'
     shell:
         """
         samtools index -@ {threads} {input}
@@ -15,105 +32,88 @@ rule samtools_index_bam:
         """
 
 
-rule samtools_flagstat:
+rule samtools_flagstat_bam_initial:
     input:
-        get_bam_file
+        "preprocess/dedup/{sample}.bam"
     output:
         'preprocess/samtools/flagstat/{sample}.flagstat'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     shell:
-        """
-        samtools flagstat -@ {threads} {input} > {output}
-        """
+        'samtools flagstat -@ {threads} {input} > {output}'
 
 
-rule samtools_idxstats:
+rule samtools_idxstats_bam_initial:
     """
     Retrieve and print stats in the index file corresponding to the input file. Before calling idxstats, the input BAM file should be indexed by samtools index. 
-    The output is TAB-delimited with each line consisting of reference sequence name, sequence length, # mapped reads and # unmapped reads. 
-
+    The output is TAB-delimited with each line consisting of reference sequence name, sequence length, # mapped reads and # unmapped reads.
     """
     input:
-        bam=get_bam_file,
+        bam="preprocess/dedup/{sample}.bam",
         bai_done='preprocess/samtools/index/{sample}.done'
     output:
         'preprocess/samtools/idxstats/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
-        """
-        samtools idxstats {input.bam} > {output}
-        """
+        'samtools idxstats {input.bam} > {output}'
 
 
-rule process_idxstat:
+rule process_samtools_idxstats_bam_initial:
     input:
         'preprocess/samtools/idxstats/{sample}.tsv'
     output:
         sorted='preprocess/samtools/idxstats/{sample}-sorted.tsv',
         top_mapped='preprocess/samtools/idxstats/{sample}-top_mapped.txt'
-    run:
-        import pandas as pd
-
-        df = pd.read_table(snakemake.input, names='genome length n_mapped n_unmapped'.split()).set_index('genome', drop=False)
-        df.sort_values(['n_mapped', 'length'], ascending=[False,False], inplace=True)
-        # write sorted table of mapping stats with headers to a file
-        df.to_csv(snakemake.output.sorted, sep='\t', index=False)
-        # write accession of topped mapped genome to a file
-        with open(snakemake.output.top_mapped, 'wt') as f:
-            f.write(df.genome[0])
+    script:
+        '../scripts/process_samtools_idxstats.py'
 
 
-rule samtools_depth:
+rule samtools_depth_bam_initial:
     """
     Calculate depth for all positions including those with zero coverage and no
     limit on coverage.
     """
     input:
-        get_bam_file
+        "preprocess/dedup/{sample}.bam"
     output:
         'preprocess/samtools/depth/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     benchmark:
-        'benchmark/samtools_depth/{sample}.tsv'
+        'benchmarks/samtools_depth/{sample}.tsv'
     shell:
-        """
-        samtools depth -a -d 0 {input} > {output}
-        """
+        'samtools depth -a -d 0 {input} > {output}'
 
 
-rule process_samtools_depth:
+rule process_samtools_depth_bam_initial:
     input:
-        'preprocess/samtools/depth/{sample}.tsv'
+        depth='preprocess/samtools/depth/{sample}.tsv',
+        idxstats='preprocess/samtools/idxstats/{sample}-sorted.tsv'
     output:
         genome_extent='preprocess/samtools/depth/{sample}-genome_extent.tsv',
         extent='preprocess/samtools/depth/{sample}-extent.tsv'
-    run:
-        import pandas as pd
+    script:
+        '../scripts/process_samtools_depth.py'
 
-        df = pd.read_table(input[0], names='genome position coverage'.split())
-        df = df.set_index('genome', drop=False)
-        df_depth = df.copy()
-        df_depth['is_mapped'] = df_depth['coverage'] > 0
-        g = df_depth.drop(columns=['position', ]).groupby('genome')
-        df_mapped_summary = pd.DataFrame(dict(mapped_positions=g.is_mapped.sum(),
-                                  mean_coverage=g.coverage.mean()))
-        df_mapped_summary.sort_values('mapped_positions', ascending=False, inplace=True)
-        df_mapped_summary.to_csv(output.genome_extent, sep='\t')
-    
-        position_grouped = df.drop(columns='genome').groupby('position')
-        df_position_max = position_grouped.max()
-        df_position_max.to_csv(output.extent, sep='\t')
 
 rule bam_to_fastq:
     input:
-        get_bam_file
+        "preprocess/dedup/{sample}.bam"
     output:
         'preprocess/fastqs/{sample}.fastq'
-    conda:
-        '../envs/bwa.yaml'
+    log:
+        'logs/samtools/bam2fq-{sample}.log'
     shell:
-        "samtools bam2fq {input} > {output}"
+        'samtools bam2fq {input} > {output} 2> {log}'
+
+
+rule trimmomatic_se:
+    input:
+        'preprocess/fastqs/{sample}.fastq'
+    output:
+        'preprocess/trimmed_fastqs/{sample}.fastq'
+    log:
+        "logs/trimmomatic/{sample}.log"
+    params:
+        # list of trimmers (see manual)
+        trimmer=["TRAILING:3", "SLIDINGWINDOW:4:15", "MINLEN:36"],
+        # optional parameters
+        extra=""
+    wrapper:
+        "0.27.1/bio/trimmomatic/se"
