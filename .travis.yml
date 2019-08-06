@@ -20,10 +20,10 @@ install:
   - conda config --add channels bioconda
   # create snakemake env
   - conda env create -f environment.yml
-  - conda activate viral-ampliseq-assembly-1.0.0
+  - source activate viral-ampliseq-assembly-1.0.0
   - conda install -y snakemake openssl=1.1
 
 script:
-  - conda activate viral-ampliseq-assembly-1.0.0
+  - source activate viral-ampliseq-assembly-1.0.0
   - snakemake --use-conda --directory test
   - snakemake --use-conda --directory test --report
