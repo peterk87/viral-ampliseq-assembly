@@ -2,8 +2,9 @@
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.2.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 [![Build Status](https://travis-ci.org/peterk87/viral-ampliseq-assembly.svg?branch=master)](https://travis-ci.com/peterk87/viral-ampliseq-assembly)
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/3359)
 
-Snakemake workflow for analysis and assembly of viral genomes from IonTorrent AmpliSeq data.
+[Snakemake][] workflow for analysis and assembly of viral genomes from IonTorrent AmpliSeq data.
 
 ## Overview
 
@@ -37,7 +38,6 @@ Snakemake workflow for analysis and assembly of viral genomes from IonTorrent Am
 
     - Phylogenetic tree constructed with [IQ-TREE][] (or [Clearcut][] if a quick and dirty tree is okay)
     - Interactive HTML phylogenetic tree visualization with [PhyloCanvas][] using [shiptv][]
-
 
 ## Authors
 
@@ -169,6 +169,7 @@ Tests cases are in the subfolder `test`. They should be executed via continuous 
 [Samtools]: https://samtools.github.io/
 [shiptv]: https://github.com/peterk87/shiptv
 [Singularity]: https://sylabs.io/docs/
+[Snakemake]: https://snakemake.readthedocs.io/en/stable/
 [SnpEff]: http://snpeff.sourceforge.net/SnpEff.html
 [SPAdes]: http://cab.spbu.ru/software/spades/
 [Trimmomatic]: http://www.usadellab.org/cms/?page=trimmomatic
