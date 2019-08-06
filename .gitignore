@@ -12,6 +12,7 @@ scripts/.snakemake*
 !envs
 !envs/*
 !environment.yaml
+!environment.yml
 !LICENSE
 !README.md
 !Singularity
