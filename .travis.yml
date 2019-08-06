@@ -21,7 +21,7 @@ install:
   # create snakemake env
   - conda env create -f environment.yml
   - conda activate viral-ampliseq-assembly-1.0.0
-  - conda install -y snakemake
+  - conda install -y snakemake openssl=1.1
 
 script:
   - conda activate viral-ampliseq-assembly-1.0.0
