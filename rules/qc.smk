@@ -21,8 +21,6 @@ rule quast_assembly_assessment:
     threads: 16
     log:
         'logs/quast.log'
-    conda:
-        '../envs/quast.yaml'
     shell:
         'quast.py -L -o {output} --threads {threads} {input} &> {log}'
 

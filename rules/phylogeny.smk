@@ -7,8 +7,6 @@ if config['fast_tree']:
             newick='msa/alignment.fasta.treefile'
         benchmark:
             'benchmarks/clearcut.tsv'
-        conda:
-            '../envs/clearcut.yaml'
         shell:
             'clearcut --alignment --DNA --in={input} --out={output}'
 else:
@@ -24,8 +22,6 @@ else:
             'logs/iqtree.log'
         benchmark:
             'benchmarks/iqtree.tsv'
-        conda:
-            '../envs/iqtree.yaml'
         shell:
             'iqtree -s {input} -nt 8 -bb 1000 -m {params.model} -redo | tee {log}'
 
@@ -34,15 +30,13 @@ rule render_tree:
         newick='msa/alignment.fasta.treefile',
         references='references/' + config['organism'] + '.genbank'
     output:
-        rooted_newick=report('phylogeny/rooted_tree.newick',
-                             caption='../report/results/phylogeny_newick.rst',
-                             category='Phylogeny'),
-        tree_png='phylogeny/rooted_tree.png',
-        tree_svg='phylogeny/rooted_tree.svg',
+        tree_html=report('phylogeny/tree.html', 
+            caption='../report/results/phylogeny_newick.rst',
+            category='Phylogenetic tree'),
         metadata_tsv='phylogeny/genome-metadata.tsv'
-    params:
-        samples=samples.index
-    conda:
-        '../envs/python_ete3.yaml'
-    script:
-        '../scripts/render_tree.py'
+    log:
+        'logs/shiptv.log'
+    benchmark:
+        'benchmarks/shiptv.tsv'
+    shell:
+        'shiptv -r {input.references} -n {input.newick} -o {output.tree_html} -m {output.metadata_tsv}'

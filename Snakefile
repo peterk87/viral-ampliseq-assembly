@@ -4,8 +4,16 @@ This is the main Snakemake entry point for the viral-ampliseq-assembly workflow.
 New rules must be included here and target files specified under rule all or another rule. 
 """
 
-# use miniconda3 docker container if --use-singularity cmdline arg set
-singularity: "docker://continuumio/miniconda3:4.4.10"
+# --use-singularity cmdline arg set
+singularity: "shub://peterk87/viral-ampliseq-assembly"
+# --use-conda will only create separate envs for each tool wrapper and not 
+# create an environment common to all rules
+# In order to run workflow with workflow global Conda env: 
+# conda env create -f environment.yml && \
+#   conda activate viral-ampliseq-assembly-1.0.0 && \
+#   conda install snakemake
+# then run your workflow inside your activated env with no --use-conda flag
+conda: "environment.yml"
 
 # include common functions to all workflows
 include: "rules/common.smk"
@@ -25,7 +33,7 @@ rule all:
         expand('consensus/{sample}.fasta', sample=samples.index),
         'msa/alignment.fasta',
         'msa/alignment.fasta.treefile',
-        'phylogeny/rooted_tree.newick'
+        'phylogeny/tree.html'
 
 
 # include rules for each step in workflow

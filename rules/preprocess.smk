@@ -23,8 +23,6 @@ rule samtools_index_bam_initial:
     output:
         'preprocess/samtools/index/{sample}.done'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     benchmark:
         'benchmarks/samtools_index_bam/{sample}.tsv'
     shell:
@@ -40,8 +38,6 @@ rule samtools_flagstat_bam_initial:
     output:
         'preprocess/samtools/flagstat/{sample}.flagstat'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     shell:
         'samtools flagstat -@ {threads} {input} > {output}'
 
@@ -56,8 +52,6 @@ rule samtools_idxstats_bam_initial:
         bai_done='preprocess/samtools/index/{sample}.done'
     output:
         'preprocess/samtools/idxstats/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         'samtools idxstats {input.bam} > {output}'
 
@@ -68,8 +62,6 @@ rule process_samtools_idxstats_bam_initial:
     output:
         sorted='preprocess/samtools/idxstats/{sample}-sorted.tsv',
         top_mapped='preprocess/samtools/idxstats/{sample}-top_mapped.txt'
-    conda:
-        '../envs/python_pandas.yaml'
     script:
         '../scripts/process_samtools_idxstats.py'
 
@@ -83,8 +75,6 @@ rule samtools_depth_bam_initial:
         "preprocess/dedup/{sample}.bam"
     output:
         'preprocess/samtools/depth/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     benchmark:
         'benchmarks/samtools_depth/{sample}.tsv'
     shell:
@@ -98,8 +88,6 @@ rule process_samtools_depth_bam_initial:
     output:
         genome_extent='preprocess/samtools/depth/{sample}-genome_extent.tsv',
         extent='preprocess/samtools/depth/{sample}-extent.tsv'
-    conda:
-        '../envs/python_pandas.yaml'
     script:
         '../scripts/process_samtools_depth.py'
 
@@ -109,8 +97,6 @@ rule bam_to_fastq:
         "preprocess/dedup/{sample}.bam"
     output:
         'preprocess/fastqs/{sample}.fastq'
-    conda:
-        '../envs/bwa.yaml'
     log:
         'logs/samtools/bam2fq-{sample}.log'
     shell:

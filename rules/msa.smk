@@ -16,9 +16,7 @@ rule mafft_msa:
         '--auto'
     log: 
         'logs/mafft.log'
-    conda:
-        '../envs/mafft.yaml'
-    threads: 56
+    threads: -1
     shell:
         'mafft --thread {threads} {params} {input} > {output} 2> >(tee -a {log} >&2)'
 

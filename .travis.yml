@@ -11,18 +11,19 @@ install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
+  # Versions of conda 4.7.x and higher should install envs and packages quicker
+  - conda install conda=4.7.10
   # Useful for debugging any issues with conda
   - conda info -a
   - conda config --add channels defaults
   - conda config --add channels conda-forge
   - conda config --add channels bioconda
   # create snakemake env
-  - conda create -q -n snakemake snakemake python=$TRAVIS_PYTHON_VERSION
-  # add additional stuff to setup below
+  - conda env create -f environment.yml
+  - conda activate viral-ampliseq-assembly-1.0.0
+  - conda install -y snakemake
 
 script:
-  - source activate snakemake
-  # run the workflow
-  # put a test case into the subfolder .test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
+  - conda activate viral-ampliseq-assembly-1.0.0
   - snakemake --use-conda --directory test
+  - snakemake --use-conda --directory test --report

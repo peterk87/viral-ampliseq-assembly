@@ -5,7 +5,5 @@ rule create_ipynb_report:
     output:
         ipynb='notebooks/{sample}-{tool}.ipynb',
         html='notebooks/{sample}-{tool}.html'
-    conda:
-        '../envs/ipynb_report.yaml'
     script:
         '../scripts/ipynb_report.py'

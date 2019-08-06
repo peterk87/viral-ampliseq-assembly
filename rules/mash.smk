@@ -15,8 +15,6 @@ rule mash_sketch_reference_genomes:
         'logs/mash/' + config['organism'] + '-mash_sketch_reference_genomes.log'
     benchmark:
         'benchmarks/mash_sketch/' + config['organism'] + '.tsv'
-    conda:
-        '../envs/mash.yaml'
     shell:
         'mash sketch -i -k {params.kmer_size} -s {params.n_sketches} -o {output} {input} > {log} 2>&1'
 
@@ -33,8 +31,6 @@ rule mash_screen_reads_vs_references:
         'logs/mash/{sample}-mash_screen_reads_vs_references.log'
     benchmark:
         'benchmarks/mash_screen/{sample}.tsv'
-    conda:
-        '../envs/mash.yaml'
     shell:
         'mash screen -p {threads} {input.sketches} {input.reads} > {output} 2> {log}'
 
@@ -62,7 +58,5 @@ rule top_reference_by_mash:
         gff='references/{sample}/reference.gff'
     log:
         'logs/scripts/top_reference_by_mash/{sample}.log'
-    conda:
-        '../envs/python_biopython.yaml'
     script:
         '../scripts/top_reference_by_mash.py'

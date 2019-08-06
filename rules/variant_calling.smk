@@ -37,8 +37,6 @@ rule filter_vcf:
         minqual=config['vcf_filtering'].get('minqual', 100),
         mincov=config['freebayes'].get('mincov', 5),
         alt_ref_ratio=config['vcf_filtering'].get('alt_ref_ratio', 1.1)
-    conda:
-        '../envs/snippy.yaml'
     shell:
         '''
         bcftools view \
@@ -59,8 +57,6 @@ rule snpeff_build:
         config='variant_calling/snpeff/{sample}/snpeff.config'
     log:
         'logs/snpeff_build/{sample}.log'
-    conda:
-        '../envs/snippy.yaml'
     shell:
         '''
         touch {output.config}
@@ -134,8 +130,6 @@ rule snpeff:
         csvstats='variant_calling/snpeff/{sample}.csv'
     params:
         extra='-Xmx4g' # optional parameters (e.g., max memory 4g)
-    conda: 
-        '../envs/snippy.yaml'
     shell:
         '''
         touch {output.vcf}
@@ -169,7 +163,5 @@ rule vcf_to_tab:
                category='Variant Calling')
     log:
         'logs/vcf_to_tab/{sample}.log'
-    conda:
-        '../envs/snippy.yaml'
     shell:
         'snippy-vcf_to_tab -gff {input.gff} --ref {input.fasta} --vcf {input.vcf} > {output} 2> {log}'

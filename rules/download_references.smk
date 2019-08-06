@@ -6,7 +6,5 @@ rule download_reference_genomes:
         organism=config['organism']
     log:
         'logs/scripts/download_reference_genomes/' + config['organism'] + '.log'
-    conda:
-        '../envs/python_biopython.yaml'
     script:
         '../scripts/download_reference_genomes.py'

@@ -11,8 +11,6 @@ rule consensus:
     params:
         min_coverage=config['freebayes']['mincov'],
         unmapped_char='-'
-    conda:
-        '../envs/python_biopython.yaml'
     script:
         '../scripts/create_consensus.py'
 

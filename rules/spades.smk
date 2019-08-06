@@ -18,8 +18,6 @@ rule spades_assembly:
         'logs/spades/{sample}.log'
     benchmark:
         'benchmarks/spades/{sample}.tsv'
-    conda:
-        '../envs/spades.yaml'
     shell:
         '''
         OUTDIR=$(dirname {output.contigs})

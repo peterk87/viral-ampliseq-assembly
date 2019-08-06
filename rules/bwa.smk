@@ -13,8 +13,6 @@ rule replace_ambiguous_bases_in_reference:
         'references/{sample}/reference-no_ambig.fasta'
     log:
         'logs/scripts/replace_ambiguous_bases_in_reference/{sample}.log'
-    conda:
-        '../envs/python_biopython.yaml'
     script:
         '../scripts/replace_ambiguous_bases_in_reference.py'
 
@@ -28,8 +26,6 @@ rule bwa_index:
         'logs/bwa_index/{sample}.log'
     benchmark:
         'benchmarks/bwa_index/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         '''
         bwa index {input} > {log} 2>&1
@@ -42,8 +38,6 @@ rule samtools_faidx:
         'references/{sample}/reference-no_ambig.fasta'
     output:
         'references/{sample}/reference-no_ambig.fasta.fai'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         '''
         samtools faidx {input}
@@ -70,8 +64,6 @@ rule bwa_mem:
         'logs/bwa_mem/{sample}.log'
     benchmark:
         'benchmarks/bwa_mem/{sample}.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         '''
         (bwa mem -t {threads} {input.ref} {input.reads} \
@@ -89,8 +81,6 @@ rule samtools_index:
     output:
         'mapping/{sample}/{sample}.bam.bai'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     shell:
         '''
         samtools index -@ {threads} {input}
@@ -104,8 +94,6 @@ rule samtools_flagstat:
     output:
         'mapping/{sample}/{sample}.flagstat'
     threads: config['samtools']['threads']
-    conda:
-        '../envs/bwa.yaml'
     shell:
         'samtools flagstat -@ {threads} {input} > {output}'
 
@@ -120,8 +108,6 @@ rule samtools_idxstats:
         bai_done='mapping/{sample}/{sample}.bam.bai'
     output:
         'mapping/{sample}/{sample}-idxstats.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         'samtools idxstats {input.bam} > {output}'
 
@@ -132,8 +118,6 @@ rule process_samtools_idxstats:
     output:
         sorted='mapping/{sample}/{sample}-idxstats-sorted.tsv',
         top_mapped='mapping/{sample}/{sample}-idxstats-top_mapped.txt'
-    conda:
-        '../envs/python_pandas.yaml'
     script:
         '../scripts/process_samtools_idxstats.py'
 
@@ -147,8 +131,6 @@ rule samtools_depth:
         'mapping/{sample}/{sample}.bam'
     output:
         'mapping/{sample}/{sample}-depth.tsv'
-    conda:
-        '../envs/bwa.yaml'
     shell:
         'samtools depth -a -d 0 {input} > {output}'
 
@@ -161,8 +143,6 @@ rule process_samtools_depth:
         genome_extent=report('mapping/{sample}/{sample}-genome_extent.tsv',
                              category='Read mapping to reference genome'),
         extent='mapping/{sample}/{sample}-extent.tsv'
-    conda:
-        '../envs/python_pandas.yaml'
     script:
         '../scripts/process_samtools_depth.py'
 
