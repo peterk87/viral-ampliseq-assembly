@@ -1,4 +1,4 @@
-Analysis and assembly of viral AmpliSeq IonTorrent sequence data. 
+viral-ampliseq-assembly (version 1.0.0): Analysis and assembly of viral AmpliSeq IonTorrent sequence data. 
 
 
 **Preprocessing**

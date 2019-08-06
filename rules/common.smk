@@ -5,6 +5,8 @@ from os.path import join
 import pandas as pd
 from snakemake.utils import validate
 
+print('viral-ampliseq-assembly version 1.0.0')
+
 report: "../report/workflow.rst"
 
 ###### Config file and sample sheets #####

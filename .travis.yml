@@ -21,9 +21,11 @@ install:
   # create snakemake env
   - conda env create -f environment.yml
   - source activate viral-ampliseq-assembly-1.0.0
+  - which bcftools
+  - ldd $(which bcftools)
   - conda install -y snakemake openssl=1.1
 
 script:
   - source activate viral-ampliseq-assembly-1.0.0
-  - snakemake --use-conda --directory test
-  - snakemake --use-conda --directory test --report
+  - snakemake --directory test
+  - snakemake --directory test --report
