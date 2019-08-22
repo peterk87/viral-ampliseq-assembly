@@ -137,13 +137,55 @@ Execute the workflow locally via
 
     snakemake --use-singularity --cores $N
 
-using `$N` cores or run it in a cluster environment via
+using `$N` cores.
 
-    snakemake --use-singularity --cluster qsub --jobs 100
+#### Cluster execution
 
-or
+*Note: You may need to install the `drmaa` Python library (`pip install drmaa`)*
 
-    snakemake --use-singularity --drmaa --jobs 100
+You can execute the workflow on a SLURM/DRMAA cluster environment with
+
+    snakemake --directory test --use-singularity --drmaa " -c 4 -p YourClusterQueueName --mem=4096 " -j 8 -w 60
+
+This will run the workflow on the test data in the `test/` directory with 4 CPUs and 4G memory per job and 8 jobs at once (`-j 8`) while waiting 60 seconds for output files to appear on the shared filesystem (`-w 60`).
+
+The cluster partition or queue to schedule jobs to is specified with `-p YourClusterQueueName`.
+
+The above will run each rule or job with 4 CPUs and 4GB memory each, which may be way more than needed or not enough so you could create a YAML (or JSON) file to specify default and specific resource requirements for some steps:
+
+Example `cluster-config.yaml`:
+
+```yaml
+__default__:
+    cpu: 1
+    partition: YourClusterQueueName
+    memory: 1024
+samtools_index_bam_initial:
+    cpu: 32
+    memory: 16384
+spades_assembly:
+    cpu: 32
+    memory: 16384
+bwa_mem:
+    cpu: 32
+    memory: 4096
+mafft_msa:
+    cpu: 32
+    memory: 4096
+iqtree:
+    cpu: 8
+    memory: 4096
+snpeff:
+    memory: 4096
+```
+
+With the `cluster-config.yaml`, run the workflow in a cluster environment via
+
+    snakemake --directory test --use-singularity --cluster-config cluster-config.yaml --drmaa " -c {cluster.cpu} -p {cluster.partition} --mem={cluster.memory} " -j 8 -w 60
+    
+
+With the above command and `cluster-config.yaml`, by default, a rule or step in the workflow will only use 1 CPU and request 1G of memory, while the rules like `iqtree` or `spades_assembly` will request more CPUs and memory from the SLURM/DRMAA scheduler. 
+
 
 See the [Snakemake documentation](https://snakemake.readthedocs.io) for further details.
 
