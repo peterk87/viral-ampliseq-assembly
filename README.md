@@ -193,6 +193,139 @@ See the [Snakemake documentation](https://snakemake.readthedocs.io) for further 
 
 Tests cases are in the subfolder `test`. They should be executed via continuous integration with Travis CI.
 
+## Output
+
+If you were to copy the files in `test` (`samples.tsv`, `bam/` and `config.yaml`) to a new directory `my-analysis-directory` and run the workflow on that directory, i.e.
+
+
+```bash
+snakemake --directory my-analysis-directory/ # other args
+```
+
+The contents of `my-analysis-directory` should look like:
+
+```bash
+my-analysis-directory
+├── phylogeny # Phylogenetic Tree Output
+│   ├── genome-metadata.tsv
+│   └── tree.html
+├── config.yaml # INPUT: Workflow Execution Config File 
+├── qc # Quality Control Output
+│   ├── multiqc.html # MultiQC report file
+│   ├── fastqc # FastQC Output
+│   │   ├── Sample1.html
+│   │   └── Sample1_fastqc.zip
+│   ├── multiqc_data
+│   │   ├── [Text files]
+│   └── quast # QUAST Output
+│       ├── report.tex
+│       ├── icarus_viewers
+│       │   └── contig_size_viewer.html
+│       ├── report.html
+│       ├── basic_stats
+│       │   ├── [QUAST PDFs]
+│       ├── icarus.html
+│       ├── transposed_report.tex
+│       ├── quast.log
+│       ├── report.pdf
+│       ├── report.txt
+│       ├── .snakemake_timestamp
+│       ├── report.tsv
+│       ├── transposed_report.tsv
+│       └── transposed_report.txt
+├── variant_calling # Variant Calling Output
+│   ├── Sample1-filtered.vcf # Filtered variants for Sample1 in VCF format
+│   ├── Sample1.vcf # Unfiltered variants for Sample1 in VCF format
+│   ├── snpeff # SnpEff Output
+│   │   ├── Sample1
+│   │   │   ├── [SnpEff specific files]
+│   │   ├── Sample1.vcf
+│   │   ├── Sample1.csv
+│   │   ├── Sample1.html # SnpEff report for Sample1
+│   │   └── Sample1.genes.txt
+│   └── Sample1-vcf.tsv # SnpEff annotated variants in a tab-delimited table
+├── mapping # Read Mapping Output
+│   └── Sample1 # Read mapping output and summary files for Sample1
+│       ├── Sample1-extent.tsv
+│       ├── Sample1-genome_extent.tsv
+│       ├── Sample1-idxstats.tsv
+│       ├── Sample1.bam
+│       ├── Sample1-depth.tsv
+│       ├── Sample1-idxstats-sorted.tsv
+│       ├── Sample1-idxstats-top_mapped.txt
+│       └── Sample1.bam.bai
+├── bam # Input directory with Sample1 BAM file specified in config.yaml
+│   └── a.bam
+├── consensus # Consensus Sequence Output
+│   └── Sample1.fasta # Consensus sequence for Sample1 from reference mapping and variant calling
+├── logs # Log files for various tools
+│   ├── <tool name>
+│   │   └── Sample1.log
+├── samples.tsv # INPUT: tab-delimited table with 2 fields: "sample" and "bam_file"
+├── references # Reference Genomes Downloaded From NCBI
+│   ├── Sample1 # Top Reference Genome
+│   │   ├── reference.gff
+│   │   ├── reference-no_ambig.fasta.bwt
+│   │   ├── reference-no_ambig.fasta.pac
+│   │   ├── reference.genbank
+│   │   ├── reference-no_ambig.fasta.amb
+│   │   ├── reference-no_ambig.fasta.ann
+│   │   ├── reference-no_ambig.fasta
+│   │   ├── reference-no_ambig.fasta.sa
+│   │   ├── reference.fasta
+│   │   └── reference-no_ambig.fasta.fai
+│   ├── csf.msh # Mash sketch database from "csf.fasta"
+│   ├── csf.genbank # CSFV genomes downloaded from NCBI in GenBank format
+│   └── csf.fasta # CSFV genomes downloaded from NCBI in FASTA format
+├── assembly # Assembly Output
+│   ├── spades # SPAdes assembly outputs for each input sample
+│   │   └── Sample1 # SPAdes assembly output for Sample1
+│   │       ├── before_rr.fasta
+│   │       ├── params.txt
+│   │       ├── contigs.paths
+│   │       ├── input_dataset.yaml
+│   │       ├── <SPAdes specific output directories>
+│   │       ├── scaffolds.paths
+│   │       ├── contigs.fasta
+│   │       ├── spades.log
+│   │       ├── assembly_graph.fastg
+│   │       ├── dataset.info
+│   │       ├── scaffolds.fasta
+│   │       └── assembly_graph_with_scaffolds.gfa
+│   └── spades-Sample1.fasta
+├── benchmarks # Benchmark runtime info for tools in workflow
+│   ├── <benchmark tab-delimited files for various tools in workflow>
+├── msa # Multiple sequence alignment (MSA) output and IQ-TREE/Clearcut phylogenetic tree
+│   ├── alignment.fasta
+│   ├── samples-pre-aln.fasta
+│   └── alignment.fasta.treefile
+└── preprocess # Preprocessing Output of Input BAM Files 
+    ├── samtools # Initial BAM file stats output
+    │   ├── depth
+    │   │   ├── Sample1-extent.tsv
+    │   │   ├── Sample1-genome_extent.tsv
+    │   │   └── Sample1.tsv
+    │   ├── flagstat
+    │   │   └── Sample1.flagstat
+    │   ├── index
+    │   │   └── Sample1.done
+    │   └── idxstats
+    │       ├── Sample1-top_mapped.txt
+    │       ├── Sample1.tsv
+    │       └── Sample1-sorted.tsv
+    ├── fastqs # Deduplicated reads in FASTQ format
+    │   └── Sample1.fastq
+    ├── mash # Mash Screen results
+    │   ├── Sample1-screen_references-sorted.tsv
+    │   └── Sample1-screen_references.tsv
+    ├── trimmed_fastqs # Trimmomatic trimmed reads
+    │   └── Sample1.fastq
+    └── dedup # Deduplicated BAM files
+        ├── Sample1.bam
+        ├── Sample1.metrics.txt
+        └── Sample1.bam.bai
+```
+
 
 [BioPython]: https://biopython.org/
 [BWA MEM]: https://github.com/lh3/bwa
