@@ -1,10 +1,10 @@
 # Snakemake workflow: viral-ampliseq-assembly
 
-[![Snakemake](https://img.shields.io/badge/snakemake-≥5.2.0-brightgreen.svg)](https://snakemake.bitbucket.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥5.5.4-brightgreen.svg)](https://snakemake.bitbucket.io)
 [![Build Status](https://travis-ci.org/peterk87/viral-ampliseq-assembly.svg?branch=master)](https://travis-ci.com/peterk87/viral-ampliseq-assembly)
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/3359)
 
-[Snakemake][] workflow for analysis and assembly of viral genomes from IonTorrent AmpliSeq data.
+[Snakemake][] workflow for analysis and assembly of viral genomes such as Classical Swine Fever Virus ([CSFV][]) from IonTorrent AmpliSeq data.
 
 ## Overview
 
